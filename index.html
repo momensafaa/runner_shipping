@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Runner ERP | نموذج التشغيل الداخلي</title>
+    <meta name="description" content="واجهة تفاعلية مبسطة لنظام التشغيل الداخلي للمستودعات." />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div class="app-shell">
+      <header class="topbar">
+        <div class="brand-wrap">
+          <div class="brand-mark">R</div>
+          <div>
+            <h1>Runner ERP <span>| Shipping &amp; Fulfillment</span></h1>
+          </div>
+        </div>
+
+        <div class="benchmark-box">
+          <div class="benchmark-item">
+            <span class="icon">⏱</span>
+            <span class="label">وقت الدفعة:</span>
+            <span id="timerValue" class="value">0م 0ث</span>
+          </div>
+          <div class="divider"></div>
+          <div class="benchmark-item target-item">
+            <span class="label">الهدف:</span>
+            <span class="value green">20 أوردر/ساعة</span>
+          </div>
+          <label class="role-picker">الدور:
+            <select id="roleSelect" aria-label="اختيار الدور">
+              <option value="employee">موظف تشغيل</option>
+              <option value="admin">مدير النظام</option>
+            </select>
+          </label>
+        </div>
+      </header>
+
+      <div class="content-row">
+        <aside class="sidebar">
+          <button class="nav-btn active" data-tab="picking">
+            <span class="nav-icon">📦</span>
+            <span>1. التحضير (Picker)</span>
+          </button>
+
+          <button class="nav-btn" data-tab="packing">
+            <span class="nav-icon">📦</span>
+            <span>2. التجهيز (Packer)</span>
+            <span id="lockBadge" class="lock-badge">🔒</span>
+          </button>
+
+          <button class="nav-btn" data-tab="dispatch">
+            <span class="nav-icon">🚚</span>
+            <span>3. التوزيع (Dispatch)</span>
+          </button>
+
+          <button class="nav-btn" data-tab="audit">
+            <span class="nav-icon">🔍</span>
+            <span>4. المراجعة (Audit)</span>
+          </button>
+
+          <button class="nav-btn admin-btn admin-only hidden" data-tab="admin">
+            <span class="nav-icon">🛡</span>
+            <span>الإدارة والرقابة</span>
+          </button>
+          <button class="nav-btn" data-tab="employee">
+            <span class="nav-icon">👤</span>
+            <span>لوحة الموظف</span>
+          </button>
+          <button class="nav-btn admin-only" data-tab="dashboard">
+            <span class="nav-icon">📊</span>
+            <span>لوحة الأدمن</span>
+          </button>
+        </aside>
+
+        <main class="main-panel">
+          <section id="pickingView" class="tab-panel">
+            <div class="panel-card">
+              <div class="panel-header">
+                <h2>📥 مسح قطع الدفعة الحالية (Batch #B-102)</h2>
+                <span class="tag">TAG: iss</span>
+              </div>
+
+              <div class="progress-wrap">
+                <div class="progress-meta">
+                  <span>نسبة إنجاز الدفعة</span>
+                  <strong id="progressText">0 / 20 أوردر</strong>
+                </div>
+                <div class="progress-track">
+                  <div id="progressBar" class="progress-fill"></div>
+                </div>
+              </div>
+
+              <form id="scanForm" class="scan-form">
+                <label>امسح الباركود المدمج (SKU-ORDERID):</label>
+                <div class="scan-row">
+                  <input
+                    id="scanInput"
+                    type="text"
+                    placeholder="مثال: SKU99-W2Q47T"
+                    autocomplete="off"
+                  />
+                  <button type="submit" class="primary-btn">تأكيد المسح</button>
+                </div>
+                <p id="scanError" class="error-message hidden">⚠ الكود غير مطابق لبيانات الدفعة!</p>
+              </form>
+            </div>
+          </section>
+
+          <section id="packingView" class="tab-panel">
+            <div class="panel-card locked-state" id="packingLocked">
+              <div class="lock-icon">🔒</div>
+              <h3>المرحلة مغلقة محظورة!</h3>
+              <p>
+                لا يمكنك البدء في مرحلة التجهيز (pr) إلا بعد اكتمال مسح الـ 20 قطعة كاملة في مرحلة التحضير.
+              </p>
+              <button id="overrideBtn" class="ghost-link">طلب فك الحظر قسرياً (Admin Override Only)</button>
+            </div>
+
+            <div class="panel-card success-state hidden" id="packingUnlocked">
+              <div class="panel-header green-header">
+                <h2>✅ الدفعة جاهزة للتجهيز والطباعة</h2>
+                <span class="tag success-tag">TAG: pr</span>
+              </div>
+              <p>تم استلام 20 أوردر بنجاح. يمكنك الآن طباعة البولايص وتحويل الشحنات إلى <strong>sh</strong>.</p>
+              <button class="primary-btn wide-btn">إصدار بولايص الشحن والتسليم لـ Fulfillment</button>
+            </div>
+          </section>
+
+          <section id="dispatchView" class="tab-panel">
+            <div class="panel-card">
+              <div class="panel-header">
+                <h2>🚚 قائمة الشحنات الجاهزة للتوزيع</h2>
+              </div>
+              <div id="dispatchList" class="order-list">
+                <!-- سيتم إضافة بيانات ديناميكية هنا -->
+              </div>
+            </div>
+          </section>
+
+          <section id="auditView" class="tab-panel">
+            <div class="panel-card">
+              <div class="panel-header">
+                <h2>🔍 سجل المراجعة والمرتجعات</h2>
+              </div>
+              <div id="auditLog" class="audit-table">
+                <!-- سيتم إضافة بيانات ديناميكية هنا -->
+              </div>
+            </div>
+          </section>
+
+          <section id="adminView" class="tab-panel admin-only-view hidden">
+            <div class="admin-grid">
+              <div class="metric-card">
+                <span>حالة القفل الحالي</span>
+                <div id="lockStatus" class="status-text">
+                  <span class="status lock">🔒 مقفول</span>
+                </div>
+              </div>
+
+              <div class="metric-card">
+                <span>الإنتاجية اللحظية</span>
+                <div class="status-text blue">20 أوردر / 60 دقيقة</div>
+              </div>
+
+              <div class="metric-card">
+                <span>إجمالي الدفعات اليوم</span>
+                <div class="status-text" id="totalBatches">5 دفعات</div>
+              </div>
+
+              <div class="metric-card">
+                <span>الأوردرات المكتملة</span>
+                <div class="status-text green" id="completedOrders">94 أوردر</div>
+              </div>
+            </div>
+            <div class="panel-card integration-panel">
+              <div class="panel-header"><h2>🔗 التكاملات والتقارير</h2><span class="tag">حالة الاتصال</span></div>
+              <div class="integration-grid">
+                <div class="integration-item"><strong>Shopify</strong><span class="connection pending">● غير متصل</span><button class="secondary-btn" data-integration="Shopify">إعداد الاتصال</button></div>
+                <div class="integration-item"><strong>Bosta Business</strong><span class="connection pending">● غير متصل</span><button class="secondary-btn" data-integration="Bosta Business">إعداد الاتصال</button></div>
+                <div class="integration-item"><strong>Google Sheets</strong><span class="connection pending">● غير متصل</span><button class="secondary-btn" data-integration="Google Sheets">إعداد الاتصال</button></div>
+              </div>
+              <div class="report-actions"><button id="exportReport" class="primary-btn">تصدير تقرير CSV</button><span id="integrationMessage" class="muted-text">اربط الخادم الخلفي قبل جلب بيانات حقيقية.</span></div>
+            </div>
+          </section>
+
+          <section id="employeeView" class="tab-panel active">
+            <div class="panel-header page-heading"><div><span class="eyebrow">WORKSPACE</span><h2>لوحة الموظف</h2></div><span class="tag">وردية اليوم</span></div>
+            <div class="admin-grid"><div class="metric-card"><span>المهمة الحالية</span><div class="status-text blue">التحضير</div></div><div class="metric-card"><span>إنجازي اليوم</span><div class="status-text green">18 أوردر</div></div><div class="metric-card"><span>وقت الوردية</span><div class="status-text">04س 12د</div></div><div class="metric-card"><span>الأخطاء</span><div class="status-text" style="color: var(--amber)">2</div></div></div>
+            <div class="panel-card employee-feed"><div class="panel-header"><h2>مهامي الحالية</h2><span class="connection online">● نشط</span></div><div class="task-row"><span>دفعة B-102</span><strong>2 / 20</strong><button class="primary-btn" data-tab-target="picking">متابعة</button></div><div class="task-row"><span>مراجعة المرتجعات</span><strong>5 طلبات</strong><button class="secondary-btn" data-tab-target="audit">فتح</button></div></div>
+          </section>
+
+          <section id="dashboardView" class="tab-panel admin-only-view">
+            <div class="panel-header page-heading"><div><span class="eyebrow">CONTROL CENTER</span><h2>لوحة تحكم الأدمن</h2></div><span class="tag success-tag">النظام يعمل</span></div>
+            <div class="admin-grid"><div class="metric-card"><span>إجمالي الأوردرات اليوم</span><div class="status-text blue">128</div><small class="trend up">↑ 12% عن أمس</small></div><div class="metric-card"><span>معدل الإنجاز</span><div class="status-text green">92%</div><small class="trend up">↑ 4.6%</small></div><div class="metric-card"><span>الموظفون النشطون</span><div class="status-text">7 / 9</div><small class="trend">آخر تحديث منذ دقيقة</small></div><div class="metric-card"><span>تحتاج مراجعة</span><div class="status-text" style="color: var(--amber)">11</div><small class="trend">طلبات متأخرة</small></div></div>
+            <div class="panel-card chart-panel"><div class="panel-header"><h2>أداء مراحل التشغيل</h2><span class="muted-text">اليوم</span></div><div class="bar-chart"><div style="--value: 86"><span>تحضير</span><i></i><b>86%</b></div><div style="--value: 72"><span>تجهيز</span><i></i><b>72%</b></div><div style="--value: 64"><span>توزيع</span><i></i><b>64%</b></div><div style="--value: 91"><span>مراجعة</span><i></i><b>91%</b></div></div></div>
+          </section>
+        </main>
+      </div>
+    </div>
+
+    <div id="adminModal" class="modal hidden">
+      <div class="modal-card">
+        <h3>⚠ فك قفل الدفعة قسرياً (Admin Override)</h3>
+        <p>
+          سيتم تسجيل هذا الإجراء في سجل الأخطاء باسم المدير. هل أنت متأكد من استثناء القطع الناقصة؟
+        </p>
+        <label class="password-label" for="adminPassword">كلمة مرور الأدمن</label>
+        <input id="adminPassword" class="modal-input" type="password" autocomplete="current-password" placeholder="أدخل كلمة المرور" />
+        <p id="passwordError" class="error-message hidden">كلمة المرور غير صحيحة.</p>
+        <div class="modal-actions">
+          <button id="cancelOverride" class="secondary-btn">إلغاء</button>
+          <button id="confirmOverride" class="danger-btn">تأكيد فك الحظر</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="orderModal" class="modal hidden">
+      <div class="modal-card large-modal">
+        <button class="modal-close" id="closeOrderModal">✕</button>
+        <h3 id="orderModalTitle">تفاصيل الأوردر</h3>
+        <div id="orderModalContent" class="order-details">
+          <!-- سيتم ملء البيانات هنا -->
+        </div>
+      </div>
+    </div>
+
+    <script src="script.js"></script>
+  </body>
+</html>
